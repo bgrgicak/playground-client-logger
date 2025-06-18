@@ -1,5 +1,5 @@
 import { startPlaygroundWeb } from '@wp-playground/client';
-import { logger, addCrashListener, collectPhpLogs } from '@php-wasm/logger';
+import { Logger, addCrashListener, collectPhpLogs, Log, logToMemory } from '@php-wasm/logger';
 
 const iframe = document.getElementById('wp') as HTMLIFrameElement;
 const client = await startPlaygroundWeb({
@@ -19,12 +19,19 @@ const client = await startPlaygroundWeb({
   }
 });
 
+const myLogHandler = ( log: Log ) => {
+  // Do what you want with the log
+  console.log('My log handler', log);
+};
+const logger = new Logger([
+  logToMemory,
+  myLogHandler,
+]);
 collectPhpLogs( logger, client );
 
 addCrashListener( logger, ( event: any ) => {
-  console.log(event.detail);
+  console.log('Crash listener', event.detail);
 } );
-
 
 await client.isReady();
 
